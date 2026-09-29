@@ -185,8 +185,8 @@ sensenova-gateway/
 
 ## 相关项目
 
-- [`kb-cli`](https://github.com/betianxia/kb-cli) — 姊妹项目：多子库 × 多层的本地知识库检索器，同样是零依赖、单文件、CLI 优先
+- [`kb-cli`](https://github.com/Babymrbbbb/kb-cli) — 姊妹项目：多子库 × 多层的本地知识库检索器，同样是零依赖、单文件、CLI 优先
 
 ## License
 
-MIT © Betianxia
+MIT © Babymrbbbb
