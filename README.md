@@ -59,42 +59,6 @@ flowchart TB
 - AI 驱动复购率从 35% 提升至 51.6%
 - 隐藏打卡任务激活 7.6 万人
 
-### 技术体系架构
-
-```mermaid
-flowchart LR
-    subgraph 交易层["交易与商品层"]
-        POS[POS 系统<br/>门店收银]
-        MP[线上小程序商城<br/>线上下单/会员触达]
-    end
-    
-    subgraph 数据层["数据层（统一口径）"]
-        DW[本地数据仓库<br/>全渠道订单/商品明细]
-        DB[辅助库<br/>好友库/客流去重/券核销]
-    end
-    
-    subgraph 交付层["交付层（三套交付物）"]
-        HTML[HTML 看板<br/>日/周/月维度]
-        API[云端 API<br/>23 个模块文件]
-        MySQL[云端数据库<br/>手机端数据源]
-    end
-    
-    subgraph 运营层["自动化运营层"]
-        Tag[标签体系<br/>20+ 组/90+ 标签]
-        MA[MA 自动营销<br/>隐藏打卡任务]
-        Coupon[优惠券体系<br/>新人券/任务券]
-    end
-    
-    subgraph AI层["AI 工具层（本仓库）"]
-        GW[sensenova-gateway<br/>聚合多个 AI 账号]
-    end
-    
-    POS & MP --> DW & DB
-    DW --> HTML & API & MySQL
-    DW & DB --> Tag & MA & Coupon
-    GW -->|配额管理| 运营层
-```
-
 ### AI 工作流全景
 
 AI 贯穿整个数据闭环，从数据接入到自动化运营：
