@@ -4,21 +4,222 @@
 
 把 N 个 SenseNova（商汤日日新）账号的 `sk-` key 聚合成**一个本地 OpenAI 兼容端点**，自动做配额滚动窗口、429/401 故障转移、冷却、别名映射、SSE 流式转发。**只用 Node 内置模块，无 npm install。**
 
-```
-Client (any OpenAI SDK)          Local Gateway (127.0.0.1:8787)              SenseNova Upstream
-    │                                   │                                           │
-    │  POST /v1/chat/completions        │  pick least-used key                     │
-    │  model: "sn-lite"       ────────► │  check rolling 5h window                 │
-    │                                   │  rewrite alias → real model id ────────► │
-    │                                   │                                           │
-    │                                   │  on 429/401: cooldown + switch key ◄──── │
-    │                                   │  retry up to N keys                      │
-    │                                   │  pipe SSE stream back ─────────────────► │
-    │  ◄─────────── HTTP + headers ─── │  x-gateway-key / x-gateway-attempts      │
-    │                                   │                                           │
+---
+
+## 🏗️ 架构总览
+
+```mermaid
+flowchart TB
+    subgraph Client["🖥️ 客户端层 (OpenAI 兼容)"]
+        direction LR
+        C1[WorkBuddy]
+        C2[Cursor]
+        C3[Copilot]
+        C4[任意 OpenAI SDK]
+    end
+
+    subgraph Gateway["🌐 sensenova-gateway (127.0.0.1:8787)"]
+        direction TB
+
+        subgraph Ingress["入口层"]
+            direction LR
+            I1[请求路由<br/>/v1/* 转发]
+            I2[别名映射<br/>sn-lite → 真实 model]
+        end
+
+        subgraph Router["智能路由"]
+            direction TB
+            R1[Key 池选择器<br/>按 5h 窗口用量最少]
+            R2[配额检查<br/>滚动窗口 ≤ 1450 次]
+            R3[冷却过滤<br/>429/401 自动隔离]
+        end
+
+        subgraph Forward["转发层"]
+            direction LR
+            F1[HTTP 转发]
+            F2[SSE 流式 pipe]
+            F3[故障转移<br/>最多重试 N 个 key]
+        end
+
+        subgraph Ops["运维端点"]
+            direction LR
+            O1[GET /health]
+            O2[GET /stats]
+            O3[GET /v1/models]
+        end
+
+        Ingress --> Router --> Forward
+    end
+
+    subgraph Upstream["☁️ SenseNova 上游"]
+        U1[token.sensenova.cn]
+    end
+
+    subgraph Storage["💾 本地状态 (无数据库)"]
+        direction TB
+        S1[keys.json<br/>N 个账号 key 池]
+        S2[state.json<br/>窗口用量 + 冷却状态]
+        S3[logs/gateway-*.log<br/>请求日志]
+        S4[config.json<br/>端口/别名/配额]
+    end
+
+    Client -->|POST /v1/chat/completions<br/>OpenAI 协议| Gateway
+    Gateway -->|HTTPS + Authorization| Upstream
+    Upstream -.->|SSE / JSON| Gateway
+    Storage <-.->|读写 (2s debounce)| Gateway
 ```
 
-## 为什么做这个
+**关键设计点：**
+- **客户端零改动** — 只需把 `base_url` 改成 `http://127.0.0.1:8787/v1`
+- **路由三件套** — Key 选择 + 配额检查 + 冷却过滤，串行判断
+- **故障转移** — 429/401 自动切下一个 key，最多试 `maxAttempts` 次
+- **零依赖** — 只用 Node 内置 `http`/`https`/`fs`/`path`，`node server.js` 直接跑
+
+---
+
+## 🔁 请求生命周期
+
+```mermaid
+sequenceDiagram
+    participant C as 客户端
+    participant G as 网关
+    participant K as Key 池
+    participant W as 配额窗口
+    participant U as 上游
+
+    C->>G: POST /v1/chat/completions<br/>model: "sn-lite"
+    
+    G->>G: 别名映射<br/>sn-lite → senseNova-6.8-flash-lite
+
+    G->>K: 获取可用 key 列表
+    K-->>G: [acc1, acc2, acc3, acc4]
+
+    loop 选择最优 key (最多 N 次)
+        G->>W: 检查 acc1 窗口用量
+        W-->>G: 已用 1200/1450
+
+        alt 配额充足 且 未冷却
+            G->>U: 转发请求 (acc1, model, body)
+            
+            alt 200 OK
+                U-->>G: SSE 流 / JSON
+                G-->>C: HTTP 200 + 响应头<br/>x-gateway-key: acc1<br/>x-gateway-attempts: 1
+            else 429 / 401
+                G->>K: 冷却 acc1<br/>(429→窗口滑动 / 401→24h)
+                G->>K: 选下一个 key (acc2)
+            end
+        else 配额已满 或 冷却中
+            G->>K: 跳过，选下一个 key
+        end
+    end
+
+    alt 全部 key 失败
+        G-->>C: HTTP 503<br/>"所有账号冷却中"
+    end
+```
+
+**关键机制：**
+1. **用量最少优先** — 不是 round-robin，而是按当前 5h 窗口内的实时用量排序
+2. **冷却到窗口滑动** — 429 如果是窗口用满，冷却到最早那次请求滑出窗口（而非固定 300s）
+3. **SSE 直接 pipe** — `upstream.pipe(res)`，不复制内容，边收边转
+4. **响应头透传诊断信息** — `x-gateway-key`（用了哪个账号）、`x-gateway-attempts`（试了几次）
+
+---
+
+## 📊 配额窗口可视化
+
+```mermaid
+gantt
+    title 5 小时滚动窗口 (示例)
+    dateFormat  HH:mm
+    axisFormat  %H:%M
+    
+    section acc1 (key-1)
+    请求 1-500   :done, t1, 10:00, 11:30
+    请求 501-1000 :done, t2, 11:30, 13:00
+    请求 1001-1450 :active, t3, 13:00, 15:00
+    冷却中 (窗口用满) :crit, t4, 15:00, 15:30
+    恢复 (最早请求滑出) :done, t5, 15:30, 16:00
+
+    section acc2 (key-2)
+    请求 1-800   :done, s1, 10:00, 12:00
+    429 冷却 (偶发限流) :crit, s2, 12:00, 12:05
+    请求 801-1400 :active, s3, 12:05, 15:00
+
+    section acc3 (key-3)
+    请求 1-300   :done, a1, 11:00, 12:00
+    空闲 (用量最少) :milestone, a2, 12:00, 15:00
+
+    section acc4 (key-4)
+    401 隔离 (24h) :crit, b1, 14:00, 15:00
+```
+
+**窗口机制：**
+- **滚动窗口** — 不是固定 5 小时块，而是任意 5 小时内的请求计数
+- **自动恢复** — 窗口滑动后，之前被冷却的账号自动可用
+- **独立计数** — 每个账号 × 每个模型独立计数，互不干扰
+
+---
+
+## 🧩 核心组件
+
+```mermaid
+classDiagram
+    direction TB
+    
+    class Gateway {
+        +port: 8787
+        +config: Config
+        +state: State
+        +handleRequest(req, res)
+        +forward(req, key, body)
+    }
+    
+    class KeyPool {
+        +keys: Key[]
+        +pickLeastUsed(model): Key
+        +coolKey(name, ms, reason)
+        +availableKeys(model): Key[]
+    }
+    
+    class QuotaWindow {
+        +windowHours: 5
+        +maxRequests: 1450
+        +record(name, model, ts)
+        +usedInWindow(name, model): int
+        +isCooldown(name, model): bool
+    }
+    
+    class CooldownTracker {
+        +cooldownMs: 300000
+        +badKeyCooldownMs: 86400000
+        +setCooldown(name, until, reason)
+        +isIsolated(name): bool
+    }
+    
+    class StateStore {
+        +state: State
+        +persist()  // 2s debounce
+        +load()
+    }
+    
+    class Logger {
+        +logRequest(entry)
+        +rotateDaily()
+    }
+    
+    Gateway --> KeyPool : uses
+    Gateway --> QuotaWindow : uses
+    Gateway --> CooldownTracker : uses
+    Gateway --> StateStore : persists
+    Gateway --> Logger : logs
+    KeyPool --> QuotaWindow : checks
+    CooldownTracker --> StateStore : stores
+```
+
+---
+
+## 🚀 快速开始
 
 SenseNova 公测期的配额是**按账号**算的：一个账号下所有 key 共享同一份 5 小时/周窗口。想放大并发只能多账号，但：
 
@@ -43,8 +244,6 @@ SenseNova 公测期的配额是**按账号**算的：一个账号下所有 key �
 | **健康检查** | `GET /health`、`GET /stats`、`GET /v1/models` 三个运维端点 |
 | **请求日志** | 每条请求记录 model / key / attempts / 耗时，落 `logs/gateway-YYYY-MM-DD.log` |
 | **16 项离线自测** | `test/smoke.js` 用 `mock-upstream.js` 模拟上游，跑完不花一分钱配额 |
-
-## 快速开始
 
 ```bash
 # 1. 复制 key 配置
