@@ -1,0 +1,30 @@
+# Secrets — never commit
+keys.json
+*.apikey
+*.secret
+.env
+
+# Runtime state
+state.json
+gateway.pid
+
+# Logs
+logs/
+*.log
+start-gateway.log
+stop-gateway.log
+status.log
+register-model.log
+setup_autostart.*.log
+start-bg.log
+
+# Test artifacts
+test/tmp/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.lnk
+.idea/
+.vscode/

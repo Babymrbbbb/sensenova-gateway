@@ -1,0 +1,8 @@
+{
+  "_comment": "Copy this file to keys.json and fill in your real SenseNova API keys. NEVER commit the real keys.json — it's in .gitignore.",
+  "keys": [
+    { "name": "acc1", "key": "sk-your-key-1" },
+    { "name": "acc2", "key": "sk-your-key-2" },
+    { "name": "acc3", "key": "sk-your-key-3" }
+  ]
+}

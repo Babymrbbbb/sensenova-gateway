@@ -1,0 +1,33 @@
+{
+  "name": "sensenova-gateway",
+  "version": "1.0.0",
+  "description": "Zero-dependency local OpenAI-compatible gateway that pools N SenseNova API keys with quota tracking, 429/401 failover, cooldown, and model aliasing.",
+  "main": "server.js",
+  "bin": {
+    "sensenova-gateway": "./start-gateway.js"
+  },
+  "scripts": {
+    "start": "node start-gateway.js",
+    "stop": "node stop-gateway.js",
+    "status": "node status.js",
+    "server": "node server.js",
+    "smoke": "node test/smoke.js",
+    "check": "node server.js --check"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "keywords": [
+    "openai-compatible",
+    "api-gateway",
+    "sensenova",
+    "quota-management",
+    "failover",
+    "zero-dependency",
+    "nodejs"
+  ],
+  "author": "Betianxia",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}

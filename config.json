@@ -1,0 +1,18 @@
+{
+  "port": 8787,
+  "host": "127.0.0.1",
+  "upstream": "https://token.sensenova.cn",
+  "localToken": "",
+  "windowHours": 5,
+  "maxRequestsPer5h": 1450,
+  "cooldownSeconds": 300,
+  "badKeyCooldownSeconds": 86400,
+  "maxAttempts": 4,
+  "idleTimeoutMs": 120000,
+  "defaultModel": "sensenova-6.8-flash-lite",
+  "aliases": {
+    "sn-lite": "sensenova-6.8-flash-lite",
+    "sn-deepseek": "deepseek-flash"
+  },
+  "logRequests": true
+}
