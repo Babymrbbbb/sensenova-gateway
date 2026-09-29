@@ -6,8 +6,8 @@
 
 [![Node.js](https://img.shields.io/badge/Node.js-22%2B-339933.svg)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Dependencies: Zero](https://img.shields.io/badge/Dependencies-Zero-blue.svg)](https://github.com/Babymrbbbb/my-sensenova-gateway)
-[![Tests: 16/16](https://img.shields.io/badge/Tests-16%2F16-brightgreen.svg)](https://github.com/Babymrbbbb/my-sensenova-gateway/tree/main/test)
+[![Dependencies: Zero](https://img.shields.io/badge/Dependencies-Zero-blue.svg)](https://github.com/Babymrbbbb/sensenova-gateway)
+[![Tests: 16/16](https://img.shields.io/badge/Tests-16%2F16-brightgreen.svg)](https://github.com/Babymrbbbb/sensenova-gateway/tree/main/test)
 
 ---
 
