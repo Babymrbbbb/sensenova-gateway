@@ -28,3 +28,4 @@ Thumbs.db
 *.lnk
 .idea/
 .vscode/
+mock-stats.js
