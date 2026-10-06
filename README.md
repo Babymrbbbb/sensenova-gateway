@@ -266,8 +266,15 @@ sensenova-gateway/
 
 ## 🔗 相关项目
 
-- **[kb-cli](https://github.com/Babymrbbbb/kb-cli)** — 姊妹项目：多子库 × 多层的本地知识库检索器，同样是零依赖、单文件、CLI 优先
-- **[prompt-craft](https://github.com/Babymrbbbb/prompt-craft)** — AI 提示词写法库（图像 + 视频），通用铁律 6 条 + 九要素结构 + 三大治法 + 叙事方法论
+这条链路是**从真实业务里长出来的完整 AI 落地体系**：
+
+- **[kb-cli](https://github.com/Babymrbbbb/kb-cli)** — 姊妹项目：多子库 × 多层的本地知识库检索器，同样是零依赖、单文件、CLI 优先。**管知识**
+- **[prompt-craft](https://github.com/Babymrbbbb/prompt-craft)** — AI 提示词写法库（图像 + 视频），通用铁律 6 条 + 九要素结构 + 三大治法 + 叙事方法论。**用好 AI**
+- **[ai-native-team](https://github.com/Babymrbbbb/ai-native-team)** — AI 原生组织 OS：把 40+ 自动化任务、数十个 AI 角色、多 AI 工具协作跑成业务生产线。**组织 AI 落地**
+
+```
+接入 AI（本仓库）→ 用好 AI（prompt-craft）→ 管理知识（kb-cli）→ 组织 AI 落地（ai-native-team）
+```
 
 ---
 
