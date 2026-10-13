@@ -2,6 +2,8 @@
 
 **Zero-dependency local OpenAI-compatible gateway that pools N SenseNova API keys into one endpoint.**
 
+> 📌 **岗位关键词映射**：统一模型调用层 / 多模型路由 / 配额调度 / 限流降级 / 故障转移 / 可观测性 / 私有化部署 —— 对应「大模型应用开发工程师」JD 中的模型接入与工程化要求。
+
 把 N 个 SenseNova 账号的 `sk-` key 聚合成**一个本地 OpenAI 兼容端点**，自动做配额滚动窗口、429/401 故障转移、冷却、别名映射、SSE 流式转发。**只用 Node 内置模块，无 npm install。**
 
 [![Node.js](https://img.shields.io/badge/Node.js-22%2B-339933.svg)](https://nodejs.org/)
