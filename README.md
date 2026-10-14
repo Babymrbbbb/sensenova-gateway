@@ -2,7 +2,7 @@
 
 **Zero-dependency local OpenAI-compatible gateway that pools N SenseNova API keys into one endpoint.**
 
-> 📌 **岗位关键词映射**：统一模型调用层 / 多模型路由 / 配额调度 / 限流降级 / 故障转移 / 可观测性 / 私有化部署 —— 对应「大模型应用开发工程师」JD 中的模型接入与工程化要求。
+> 📌 **技术关键词**：统一模型调用层 / 多模型路由 / 配额调度 / 限流降级 / 故障转移 / 可观测性 / 私有化部署 —— 覆盖企业 AI 落地中最常见的模型接入与工程化场景。
 
 把 N 个 SenseNova 账号的 `sk-` key 聚合成**一个本地 OpenAI 兼容端点**，自动做配额滚动窗口、429/401 故障转移、冷却、别名映射、SSE 流式转发。**只用 Node 内置模块，无 npm install。**
 
@@ -290,7 +290,7 @@ sensenova-gateway/
 4. **Smoke test 兜底**：替换后跑 `node test/smoke.js`（16 项离线测试）验证功能不退化
 5. **Push 前 grep 扫描**：6 大类敏感词（品牌名/竞品名/内部术语/博主工具/旧仓库名/真实 Key）全部 grep 一遍，命中必须归零
 
-这套流程在 portfolio 的多个仓库里复用（gateway、kb-cli、prompt-craft 都走过一遍），是 FDE 在企业客户现场最常碰的"数据合规 + 工程实践"组合场景。
+这套流程在 portfolio 的多个仓库里复用（gateway、kb-cli、prompt-craft 都走过一遍），是「数据合规 + 工程实践」在企业客户现场最常碰的组合场景。
 
 ---
 
