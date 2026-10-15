@@ -266,17 +266,33 @@ sensenova-gateway/
 
 ---
 
-## 🔗 相关项目
+## 🔗 这是一套体系的一部分，不是孤立项目
 
-这条链路是**从真实业务里长出来的完整 AI 落地体系**：
-
-- **[kb-cli](https://github.com/Babymrbbbb/kb-cli)** — 姊妹项目：多子库 × 多层的本地知识库检索器，同样是零依赖、单文件、CLI 优先。**管知识**
-- **[prompt-craft](https://github.com/Babymrbbbb/prompt-craft)** — AI 提示词写法库（图像 + 视频），通用铁律 6 条 + 九要素结构 + 三大治法 + 叙事方法论。**用好 AI**
-- **[ai-native-team](https://github.com/Babymrbbbb/ai-native-team)** — AI 原生组织 OS：把 40+ 自动化任务、数十个 AI 角色、多 AI 工具协作跑成业务生产线。**组织 AI 落地**
+> **核心**：所有仓库围绕同一件事——让 45 家门店的真实业务被 AI 高效落地。每个仓库解决一个环节，合起来是一条完整生产线。
 
 ```
-接入 AI（本仓库）→ 用好 AI（prompt-craft）→ 管理知识（kb-cli）→ 组织 AI 落地（ai-native-team）
+接入 AI（gateway）→ 用好 AI（prompt-craft）→ 管理/编译知识（kb-cli + llm-wiki）→ 组织 AI 落地（ai-native-team）→ 交付业务结果（驾驶舱 / 指挥台）
 ```
+
+### 本仓库在体系中的位置
+
+**为什么改造**：接入多个上游模型账号后，配额按账号算、429/401 频发、客户端要维护 N 套 base URL 和 key。不改，AI 根本不稳定。
+
+**意义**：把「AI 调用」变成可靠的基础设施——多账号池化 + 配额调度 + 限流降级，让上层 Prompt 工程、知识库、Agent 编排都跑在稳定底座上。
+
+**结合哪些部分**：
+- 给 **prompt-craft** 的跨模态生成提供稳定模型通道
+- 给 **llm-wiki** 的批量知识编译提供 429 重试保障
+- 给 **ai-native-team** 的 44 个自动化任务提供配额治理
+
+**单独用的价值**：即使不用整套体系，任何一个需要稳定调用多个模型账号的团队都能直接用——多 key 轮询、429 自动切换、16 项离线自测。
+
+### 相关项目
+
+- **[prompt-craft](https://github.com/Babymrbbbb/prompt-craft)** — 用好 AI：提示词方法论，决定 AI 产出质量
+- **[kb-cli](https://github.com/Babymrbbbb/kb-cli)** — 管理知识：多子库 × 多层检索，让知识找得到
+- **[llm-wiki](https://github.com/Babymrbbbb/llm-wiki)** — 编译知识：raw → wiki → RAG，让知识可导航
+- **[ai-native-team](https://github.com/Babymrbbbb/ai-native-team)** — 组织 AI 落地：多智能体协作不失控
 
 ---
 
