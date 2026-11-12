@@ -82,7 +82,8 @@ const server = http.createServer(async (req, res) => {
     const map = {
       401: { message: 'invalid api key', type: 'authentication_error' },
       429: { message: 'quota exceeded (mock)', type: 'quota_exceeded_error' },
-      500: { message: 'internal server error (mock)', type: 'server_error' }
+      500: { message: 'internal server error (mock)', type: 'server_error' },
+      503: { message: 'service unavailable (mock)', type: 'service_unavailable_error' }
     };
     res.writeHead(status, { 'content-type': 'application/json' });
     return res.end(JSON.stringify({ error: map[status] || { message: 'mock error' } }));
